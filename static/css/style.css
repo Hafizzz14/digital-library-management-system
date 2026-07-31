@@ -1,0 +1,56 @@
+/* Import Google Fonts: Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+    /* Color Palette */
+    --primary-color: #2B547E;
+    --secondary-color: #6C757D;
+    --bg-color: #F8F9FA;
+    --surface-color: #FFFFFF;
+    --text-color: #212529;
+
+    /* Spacing & Radius */
+    --radius-md: 6px;
+    --radius-lg: 8px;
+
+    /* Shadow */
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Base Layout CSS */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    min-height: 100vh;
+    background-color: var(--surface-color);
+    border-right: 1px solid #e9ecef;
+}
+
+#content {
+    width: 100%;
+}
+
+.digilib-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    border: none;
+}
+
+.btn-primary-custom {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-md);
+}
+
+.btn-primary-custom:hover {
+    background-color: #1a3653;
+    color: white;
+}

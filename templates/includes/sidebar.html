@@ -1,0 +1,55 @@
+<nav id="sidebar" class="d-flex flex-column p-3">
+    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none text-dark">
+        <i class="bi bi-book-half fs-4 me-2" style="color: var(--primary-color);"></i>
+        <span class="fs-4 fw-bold">DigiLib</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="#" class="nav-link text-dark fw-semibold">
+                <i class="bi bi-grid me-2"></i> Dashboard
+            </a>
+        </li>
+        <li class="nav-item mt-3">
+            <small class="text-muted text-uppercase fw-bold px-3">Master Data</small>
+        </li>
+        <li>
+            <a href="#" class="nav-link text-dark">
+                <i class="bi bi-journals me-2"></i> Buku
+            </a>
+        </li>
+        <li>
+            <a href="#" class="nav-link text-dark">
+                <i class="bi bi-people me-2"></i> Anggota
+            </a>
+        </li>
+        <li class="nav-item mt-3">
+            <small class="text-muted text-uppercase fw-bold px-3">Sirkulasi</small>
+        </li>
+        <li>
+            <a href="#" class="nav-link text-dark">
+                <i class="bi bi-arrow-up-right-square me-2"></i> Peminjaman
+            </a>
+        </li>
+        <li>
+            <a href="#" class="nav-link text-dark">
+                <i class="bi bi-arrow-down-left-square me-2"></i> Pengembalian
+            </a>
+        </li>
+    </ul>
+    <hr>
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle fs-5 me-2"></i>
+            <strong>{{ user.username }}</strong>
+        </a>
+        <ul class="dropdown-menu text-small shadow">
+            <li>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
