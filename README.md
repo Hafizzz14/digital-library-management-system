@@ -1,5 +1,11 @@
 # 📚 Digital Library Management System
 
+![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)
+![Django](https://img.shields.io/badge/Django-6.0-green?logo=django)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple?logo=bootstrap)
+![SQLite](https://img.shields.io/badge/SQLite-Database-blue?logo=sqlite)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 A modern web-based Library Management System built with **Django** and **Bootstrap 5**. This application helps librarians manage books, members, and borrowing transactions efficiently through a clean and responsive interface.
 
 ---
@@ -93,16 +99,23 @@ Digital_Library_Management_System/
 
 # 📷 Screenshots
 
-> Screenshots will be added soon.
+## Login Page
+![Login](assets/login.png)
 
-- Login Page
-- Dashboard
-- Book Management
-- Category Management
-- Member Management
-- Borrowing Transaction
-- Returning Process
-- CSV Export
+## Dashboard
+![Dashboard](assets/dashboard.png)
+
+## Book Management
+![Books](assets/books.png)
+
+## Category Management
+![Category](assets/kategori.png)
+
+## Member Management
+![Members](assets/members.png)
+
+## Transactions
+![Transaction](assets/transactions.png)
 
 ---
 
