@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - DigiLib{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Animasi ringan dan hover effect ala SaaS */
+    .digilib-card {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-control, .form-select {
+        transition: all 0.3s ease;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(43, 84, 126, 0.15);
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .required-asterisk {
+        color: #dc3545;
+        margin-left: 2px;
+    }
+
+    .btn-action {
+        transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-xl-10 col-lg-12">
+        <div class="card digilib-card border-0 shadow-sm overflow-hidden">
+            <!-- Card Header -->
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center">
+                <div class="bg-light p-2 rounded-circle me-3">
+                    <i class="bi bi-journal-text fs-4 text-primary" style="color: var(--primary-color) !important;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">{{ title }}</h5>
+                    <p class="text-muted small mb-0">Lengkapi informasi di bawah ini dengan data yang valid.</p>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body p-4 p-md-5">
+                <form id="bookForm" method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger d-flex align-items-center rounded-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>{{ form.non_field_errors|join:", " }}</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="row gy-4">
+                        <!-- Kolom Kiri -->
+                        <div class="col-md-6 border-md-end pe-md-4">
+                            <h6 class="fw-bold text-muted mb-3 text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Informasi Utama</h6>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.judul.id_for_label }}" class="form-label fw-semibold">Judul Buku<span class="required-asterisk">*</span></label>
+                                <input type="text" name="{{ form.judul.name }}" class="form-control {% if form.judul.errors %}is-invalid{% endif %}" id="{{ form.judul.id_for_label }}" value="{{ form.judul.value|default_if_none:'' }}" placeholder="Masukkan judul buku">
+                                {% if form.judul.errors %}
+                                    <div class="invalid-feedback">{{ form.judul.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.kategori.id_for_label }}" class="form-label fw-semibold">Kategori<span class="required-asterisk">*</span></label>
+                                <select name="{{ form.kategori.name }}" class="form-select {% if form.kategori.errors %}is-invalid{% endif %}" id="{{ form.kategori.id_for_label }}">
+                                    <option value="">-- Pilih Kategori --</option>
+                                    {% for choice in form.kategori.field.choices %}
+                                        <option value="{{ choice.0|default_if_none:'' }}" {% if form.kategori.value|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.kategori.errors %}
+                                    <div class="invalid-feedback">{{ form.kategori.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6 mb-3">
+                                    <label for="{{ form.penulis.id_for_label }}" class="form-label fw-semibold">Penulis<span class="required-asterisk">*</span></label>
+                                    <input type="text" name="{{ form.penulis.name }}" class="form-control {% if form.penulis.errors %}is-invalid{% endif %}" id="{{ form.penulis.id_for_label }}" value="{{ form.penulis.value|default_if_none:'' }}" placeholder="Nama penulis">
+                                    {% if form.penulis.errors %}
+                                        <div class="invalid-feedback">{{ form.penulis.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <label for="{{ form.penerbit.id_for_label }}" class="form-label fw-semibold">Penerbit<span class="required-asterisk">*</span></label>
+                                    <input type="text" name="{{ form.penerbit.name }}" class="form-control {% if form.penerbit.errors %}is-invalid{% endif %}" id="{{ form.penerbit.id_for_label }}" value="{{ form.penerbit.value|default_if_none:'' }}" placeholder="Nama penerbit">
+                                    {% if form.penerbit.errors %}
+                                        <div class="invalid-feedback">{{ form.penerbit.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6 mb-3 mb-md-0">
+                                    <label for="{{ form.tahun_terbit.id_for_label }}" class="form-label fw-semibold">Tahun Terbit<span class="required-asterisk">*</span></label>
+                                    <input type="number" name="{{ form.tahun_terbit.name }}" class="form-control {% if form.tahun_terbit.errors %}is-invalid{% endif %}" id="{{ form.tahun_terbit.id_for_label }}" value="{{ form.tahun_terbit.value|default_if_none:'' }}" placeholder="YYYY">
+                                    {% if form.tahun_terbit.errors %}
+                                        <div class="invalid-feedback">{{ form.tahun_terbit.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-6 mb-0">
+                                    <label for="{{ form.isbn.id_for_label }}" class="form-label fw-semibold">ISBN<span class="required-asterisk">*</span></label>
+                                    <input type="text" name="{{ form.isbn.name }}" class="form-control {% if form.isbn.errors %}is-invalid{% endif %}" id="{{ form.isbn.id_for_label }}" value="{{ form.isbn.value|default_if_none:'' }}" placeholder="Misal: 978-...">
+                                    {% if form.isbn.errors %}
+                                        <div class="invalid-feedback">{{ form.isbn.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kolom Kanan -->
+                        <div class="col-md-6 ps-md-4">
+                            <h6 class="fw-bold text-muted mb-3 text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Inventaris & Media</h6>
+                            
+                            <div class="row">
+                                <div class="col-sm-6 mb-3">
+                                    <label for="{{ form.total_stok.id_for_label }}" class="form-label fw-semibold">Total Stok<span class="required-asterisk">*</span></label>
+                                    <input type="number" name="{{ form.total_stok.name }}" class="form-control bg-light {% if form.total_stok.errors %}is-invalid{% endif %}" id="{{ form.total_stok.id_for_label }}" value="{{ form.total_stok.value|default_if_none:'0' }}">
+                                    {% if form.total_stok.errors %}
+                                        <div class="invalid-feedback">{{ form.total_stok.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-6 mb-3">
+                                    <label for="{{ form.stok_tersedia.id_for_label }}" class="form-label fw-semibold">Stok Tersedia<span class="required-asterisk">*</span></label>
+                                    <input type="number" name="{{ form.stok_tersedia.name }}" class="form-control bg-light {% if form.stok_tersedia.errors %}is-invalid{% endif %}" id="{{ form.stok_tersedia.id_for_label }}" value="{{ form.stok_tersedia.value|default_if_none:'0' }}">
+                                    {% if form.stok_tersedia.errors %}
+                                        <div class="invalid-feedback">{{ form.stok_tersedia.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">Status Buku<span class="required-asterisk">*</span></label>
+                                <select name="{{ form.status.name }}" class="form-select {% if form.status.errors %}is-invalid{% endif %}" id="{{ form.status.id_for_label }}">
+                                    {% for choice in form.status.field.choices %}
+                                        <option value="{{ choice.0|default_if_none:'' }}" {% if form.status.value|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback">{{ form.status.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-0">
+                                <label for="coverUpload" class="form-label fw-semibold">Cover Buku</label>
+                                <input type="file" name="{{ form.cover_image.name }}" class="form-control {% if form.cover_image.errors %}is-invalid{% endif %}" id="coverUpload" accept="image/jpeg, image/png">
+                                <div class="form-text small" id="fileNameDisplay">Format yang didukung: JPG, PNG. Rekomendasi rasio 2:3.</div>
+                                {% if form.cover_image.errors %}
+                                    <div class="invalid-feedback">{{ form.cover_image.errors|join:", " }}</div>
+                                {% endif %}
+                                
+                                <!-- JS Image Preview Container -->
+                                <div class="mt-3 p-3 border rounded-3 text-center bg-white shadow-sm d-none fade" id="previewContainer">
+                                    <span class="d-block text-muted small fw-semibold mb-2"><i class="bi bi-image me-1"></i>Preview Cover Baru</span>
+                                    <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded" style="max-height: 180px; object-fit: contain;">
+                                </div>
+
+                                <!-- Existing Image (Edit Mode) -->
+                                {% if form.instance.pk and form.instance.cover_image %}
+                                    <div class="mt-3 p-3 border rounded-3 text-center bg-light" id="existingCoverContainer">
+                                        <span class="d-block text-muted small fw-semibold mb-2">Cover Saat Ini</span>
+                                        <img src="{{ form.instance.cover_image.url }}" alt="Cover {{ form.instance.judul }}" class="img-fluid rounded shadow-sm" style="max-height: 180px; object-fit: contain;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-muted border-2 opacity-10">
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'book_list' %}" class="btn btn-outline-secondary px-4 btn-action rounded-3 fw-semibold">
+                            Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom px-4 btn-action rounded-3 fw-semibold" id="submitBtn">
+                            <span id="btnText">
+                                <i class="bi bi-save me-1"></i> 
+                                {% if form.instance.pk %}Update Buku{% else %}Simpan Buku{% endif %}
+                            </span>
+                            <span id="btnLoading" class="d-none">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Menyimpan...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript untuk Preview Image dan Button Loading State -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const coverUpload = document.getElementById('coverUpload');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const existingCoverContainer = document.getElementById('existingCoverContainer');
+        const bookForm = document.getElementById('bookForm');
+        
+        // Image Preview Logic
+        coverUpload.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            
+            if (file) {
+                // Tampilkan nama file
+                fileNameDisplay.innerHTML = `<span class="text-primary"><i class="bi bi-check-circle-fill me-1"></i>File terpilih: ${file.name}</span>`;
+                
+                // Baca dan tampilkan gambar
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.classList.remove('d-none');
+                    previewContainer.classList.add('show');
+                    
+                    // Sembunyikan cover lama jika ada
+                    if (existingCoverContainer) {
+                        existingCoverContainer.classList.add('d-none');
+                    }
+                }
+                reader.readAsDataURL(file);
+            } else {
+                // Reset jika batal pilih file
+                fileNameDisplay.textContent = 'Format yang didukung: JPG, PNG. Rekomendasi rasio 2:3.';
+                previewContainer.classList.add('d-none');
+                previewContainer.classList.remove('show');
+                
+                // Munculkan lagi cover lama jika ada
+                if (existingCoverContainer) {
+                    existingCoverContainer.classList.remove('d-none');
+                }
+            }
+        });
+
+        // Loading State Logic saat form disubmit
+        bookForm.addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            
+            // Tambahkan class disabled untuk mencegah multiple klik
+            submitBtn.classList.add('disabled');
+            
+            // Swap text dengan spinner animasi
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+        });
+    });
+</script>
+{% endblock %}
