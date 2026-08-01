@@ -16,7 +16,28 @@ def root_redirect(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'dashboard/index.html')
+    # Kalkulasi Metrik Utama
+    total_buku = Buku.objects.count()
+    total_anggota = Anggota.objects.count()
+    peminjaman_aktif = Transaksi.objects.filter(status='Borrowed').count()
+    
+    # Mengambil 5 Transaksi Terakhir untuk tabel "Recent Activity"
+    # Menggunakan select_related untuk optimasi query
+    transaksi_terbaru = Transaksi.objects.select_related('buku', 'anggota').all().order_by('-tanggal_pinjam', '-id')[:5]
+    
+    # Mengambil Cookie 'last_borrowed_book'
+    buku_terakhir_dipinjam = request.COOKIES.get('last_borrowed_book', None)
+    
+    # Membungkus semua data ke dalam context
+    context = {
+        'total_buku': total_buku,
+        'total_anggota': total_anggota,
+        'peminjaman_aktif': peminjaman_aktif,
+        'transaksi_terbaru': transaksi_terbaru,
+        'buku_terakhir_dipinjam': buku_terakhir_dipinjam,
+    }
+    
+    return render(request, 'dashboard/index.html', context)
 
 @login_required
 def book_list(request):

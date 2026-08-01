@@ -1,15 +1,211 @@
 {% extends 'base.html' %}
 
 {% block title %}Dashboard - DigiLib{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard Analytics{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card digilib-card p-5 text-center mt-4">
-            <h2 class="fw-bold" style="color: var(--primary-color);">Welcome to DigiLib, {{ user.username }}!</h2>
-            <p class="text-muted fs-5">Sistem Manajemen Perpustakaan Digital</p>
-            <p class="mt-3">Layout dasar dan sistem autentikasi berhasil dibangun. Siap untuk tahap CRUD selanjutnya.</p>
+<style>
+    /* SaaS Dashboard Styling & Animations */
+    .digilib-card {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .stat-card-blue { border-left-color: var(--primary-color); }
+    .stat-card-green { border-left-color: #198754; }
+    .stat-card-amber { border-left-color: #fd7e14; }
+
+    .icon-shape {
+        width: 52px;
+        height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+    }
+
+    .table-hover tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge-borrowed {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        border: 1px solid rgba(13, 110, 253, 0.2);
+    }
+    
+    .badge-returned {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+</style>
+
+<!-- Banner Notifikasi Cookie (Requirement PRD) -->
+{% if buku_terakhir_dipinjam %}
+    <div class="alert alert-primary border-0 bg-primary bg-opacity-10 alert-dismissible fade show mb-4 shadow-sm rounded-3 digilib-card" role="alert">
+        <div class="d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
+                <i class="bi bi-clock-history fs-5"></i>
+            </div>
+            <div>
+                <strong class="text-primary">Aktivitas Sesi Terakhir (Cookie):</strong> 
+                Buku <span class="fw-bold">"{{ buku_terakhir_dipinjam }}"</span> baru saja diproses dalam transaksi peminjaman terbaru.
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endif %}
+
+<!-- Header Section -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1 text-dark">
+            <i class="bi bi-speedometer2 me-2" style="color: var(--primary-color);"></i>Ringkasan Perpustakaan
+        </h4>
+        <p class="text-muted small mb-0">Selamat datang kembali, <strong>{{ user.username|title }}</strong>! Berikut adalah metrik operasional DigiLib hari ini.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'peminjaman_create' %}" class="btn btn-primary-custom px-4 py-2 shadow-sm fw-semibold rounded-3">
+            <i class="bi bi-cart-plus me-2"></i>Pinjam Buku
+        </a>
+    </div>
+</div>
+
+<!-- Grid Metric Cards -->
+<div class="row g-3 mb-4">
+    <!-- Card 1: Total Judul Buku -->
+    <div class="col-md-4">
+        <div class="card stat-card stat-card-blue border-0 shadow-sm p-3 rounded-3 digilib-card">
+            <div class="card-body d-flex align-items-center justify-content-between p-0">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.5px;">Koleksi Buku</span>
+                    <h2 class="fw-bold text-dark mt-2 mb-0">{{ total_buku }}</h2>
+                    <span class="small text-muted">Judul terdaftar</span>
+                </div>
+                <div class="icon-shape bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-journal-bookmark fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Total Anggota -->
+    <div class="col-md-4">
+        <div class="card stat-card stat-card-green border-0 shadow-sm p-3 rounded-3 digilib-card">
+            <div class="card-body d-flex align-items-center justify-content-between p-0">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.5px;">Total Anggota</span>
+                    <h2 class="fw-bold text-dark mt-2 mb-0">{{ total_anggota }}</h2>
+                    <span class="small text-muted">Peminjam aktif</span>
+                </div>
+                <div class="icon-shape bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-people fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Peminjaman Aktif -->
+    <div class="col-md-4">
+        <div class="card stat-card stat-card-amber border-0 shadow-sm p-3 rounded-3 digilib-card">
+            <div class="card-body d-flex align-items-center justify-content-between p-0">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase" style="letter-spacing: 0.5px;">Peminjaman Aktif</span>
+                    <h2 class="fw-bold text-dark mt-2 mb-0">{{ peminjaman_aktif }}</h2>
+                    <span class="small text-muted">Buku belum kembali</span>
+                </div>
+                <div class="icon-shape bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-arrow-repeat fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section: Recent Activity Table -->
+<div class="card digilib-card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h6 class="fw-bold text-dark mb-0">
+                <i class="bi bi-clock-history me-2 text-primary"></i>Transaksi Terbaru
+            </h6>
+        </div>
+        <div>
+            <a href="{% url 'transaksi_list' %}" class="btn btn-sm btn-link text-decoration-none fw-semibold p-0" style="color: var(--primary-color);">
+                Lihat Semua Transaksi <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+                <thead class="bg-light text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;">
+                    <tr>
+                        <th class="ps-4 py-3 border-bottom-0">Peminjam</th>
+                        <th class="py-3 border-bottom-0">Buku</th>
+                        <th class="py-3 border-bottom-0">Tanggal Pinjam</th>
+                        <th class="py-3 border-bottom-0">Batas Kembali</th>
+                        <th class="pe-4 py-3 border-bottom-0 text-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for t in transaksi_terbaru %}
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <div class="fw-bold text-dark">{{ t.anggota.nama_lengkap }}</div>
+                            </td>
+                            <td class="py-3">
+                                <div class="text-dark fw-semibold text-truncate" style="max-width: 220px;">
+                                    {{ t.buku.judul }}
+                                </div>
+                            </td>
+                            <td class="py-3 text-muted small">
+                                {{ t.tanggal_pinjam|date:"d M Y" }}
+                            </td>
+                            <td class="py-3 text-muted small">
+                                {{ t.batas_kembali|date:"d M Y" }}
+                            </td>
+                            <td class="pe-4 py-3 text-end">
+                                {% if t.status == 'Returned' %}
+                                    <span class="badge badge-returned rounded-pill px-3 py-1 fw-semibold">
+                                        <i class="bi bi-check-lg me-1"></i> Selesai
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-borrowed rounded-pill px-3 py-1 fw-semibold">
+                                        <i class="bi bi-book-half me-1"></i> Aktif
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted small">
+                                Belum ada aktivitas peminjaman buku.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
