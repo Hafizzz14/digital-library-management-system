@@ -1,3 +1,5 @@
+import csv
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -369,3 +371,41 @@ def pengembalian_proses(request, pk):
         
     context = {'transaksi': transaksi}
     return render(request, 'library/pengembalian_confirm.html', context)
+
+@login_required
+def export_csv_transaksi(request):
+    # HTTP Response CSV
+    response = HttpResponse(content_type='text/csv')
+    
+    response['Content-Disposition'] = 'attachment; filename="Laporan_Transaksi_DigiLib.csv"'
+    
+    writer = csv.writer(response, delimiter=';')
+    
+    writer.writerow([
+        'ID Transaksi', 
+        'Nama Peminjam', 
+        'Nomor Anggota', 
+        'Judul Buku', 
+        'Tanggal Pinjam', 
+        'Batas Kembali', 
+        'Tanggal Kembali Aktual', 
+        'Status'
+    ])
+    
+    transaksi_list = Transaksi.objects.select_related('anggota', 'buku').all().order_by('-tanggal_pinjam')
+    
+    for t in transaksi_list:
+        tgl_kembali = t.tanggal_kembali.strftime('%Y-%m-%d') if t.tanggal_kembali else '-'
+        
+        writer.writerow([
+            t.id,
+            t.anggota.nama_lengkap,
+            t.anggota.nomor_anggota,
+            t.buku.judul,
+            t.tanggal_pinjam.strftime('%Y-%m-%d'),
+            t.batas_kembali.strftime('%Y-%m-%d'),
+            tgl_kembali,
+            t.status
+        ])
+        
+    return response

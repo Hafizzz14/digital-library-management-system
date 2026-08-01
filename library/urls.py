@@ -35,4 +35,7 @@ urlpatterns = [
     path('transaksi/', views.transaksi_list, name='transaksi_list'),
     path('transaksi/pinjam/', views.peminjaman_create, name='peminjaman_create'),
     path('transaksi/<int:pk>/kembali/', views.pengembalian_proses, name='pengembalian_proses'),
+
+    # URL Export CSV
+    path('transaksi/export/csv/', views.export_csv_transaksi, name='export_csv_transaksi'),
 ]
