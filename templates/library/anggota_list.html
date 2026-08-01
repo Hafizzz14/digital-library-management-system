@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}Manajemen Anggota - DigiLib{% endblock %}
+{% block page_title %}Manajemen Anggota{% endblock %}
+
+{% block content %}
+<style>
+    /* SaaS-like Table Styles & Animations */
+    .digilib-card {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .table-hover tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .search-input:focus {
+        box-shadow: none;
+        border-color: #ced4da;
+    }
+    
+    .search-icon-box {
+        background-color: #fff;
+    }
+    
+    .page-link {
+        color: var(--secondary-color);
+    }
+    
+    .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-action-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        transition: all 0.2s;
+    }
+    
+    .btn-action-icon:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- Header Section -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1 text-dark">
+            <i class="bi bi-people me-2" style="color: var(--primary-color);"></i>Manajemen Anggota
+        </h4>
+        <p class="text-muted small mb-0">Kelola direktori peminjam dan informasi kontak anggota perpustakaan.</p>
+    </div>
+    <div>
+        <a href="{% url 'anggota_create' %}" class="btn btn-primary-custom px-4 py-2 shadow-sm fw-semibold rounded-3">
+            <i class="bi bi-person-plus-fill me-2"></i>Tambah Anggota
+        </a>
+    </div>
+</div>
+
+<!-- Notifikasi Messages Django -->
+{% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                {% if message.tags == 'success' %}
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                {% elif message.tags == 'error' %}
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Card Utama -->
+<div class="card digilib-card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <!-- Toolbar Atas: Search Bar -->
+        <div class="p-4 border-bottom bg-white rounded-top">
+            <div class="row">
+                <div class="col-md-5 col-lg-4">
+                    <form method="get" action="">
+                        <div class="input-group input-group-sm shadow-sm rounded-3 overflow-hidden">
+                            <span class="input-group-text search-icon-box border-end-0 text-muted px-3">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control search-input border-start-0 ps-0 py-2" name="q" value="{{ query }}" placeholder="Cari nama, ID, atau email...">
+                            <button class="btn btn-light border px-3 text-muted fw-semibold hover-bg" type="submit">Cari</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Data -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+                <thead class="bg-light text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;">
+                    <tr>
+                        <th class="ps-4 py-3 border-bottom-0">ID Anggota</th>
+                        <th class="py-3 border-bottom-0">Nama Lengkap</th>
+                        <th class="py-3 border-bottom-0">Kontak</th>
+                        <th class="py-3 border-bottom-0">Alamat</th>
+                        <th class="py-3 border-bottom-0">Terdaftar</th>
+                        <th class="pe-4 py-3 border-bottom-0 text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for anggota in page_obj %}
+                        <tr>
+                            <!-- Kolom: ID Anggota -->
+                            <td class="ps-4 py-3">
+                                <span class="badge bg-light text-dark border fw-medium px-2 py-1">
+                                    <i class="bi bi-person-badge me-1 text-muted"></i>{{ anggota.nomor_anggota }}
+                                </span>
+                            </td>
+                            
+                            <!-- Kolom: Nama Lengkap -->
+                            <td class="py-3">
+                                <div class="fw-bold text-dark">{{ anggota.nama_lengkap }}</div>
+                            </td>
+                            
+                            <!-- Kolom: Kontak (Email & Telp) -->
+                            <td class="py-3">
+                                <div class="small text-dark">
+                                    <i class="bi bi-telephone text-muted me-1"></i> {{ anggota.no_telepon }}
+                                </div>
+                                <div class="small mt-1 text-muted">
+                                    <i class="bi bi-envelope me-1"></i> {{ anggota.email|default:"-" }}
+                                </div>
+                            </td>
+
+                            <!-- Kolom: Alamat -->
+                            <td class="py-3 text-muted text-wrap" style="max-width: 200px;">
+                                <div class="small text-truncate" title="{{ anggota.alamat }}">
+                                    {{ anggota.alamat }}
+                                </div>
+                            </td>
+
+                            <!-- Kolom: Terdaftar -->
+                            <td class="py-3 text-muted small">
+                                {{ anggota.created_at|date:"d M Y" }}
+                            </td>
+                            
+                            <!-- Kolom: Aksi -->
+                            <td class="pe-4 py-3 text-end">
+                                <a href="{% url 'anggota_update' anggota.pk %}" class="btn btn-outline-primary btn-action-icon rounded-circle border-0 bg-primary bg-opacity-10" title="Edit Anggota">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{% url 'anggota_delete' anggota.pk %}" class="btn btn-outline-danger btn-action-icon rounded-circle border-0 bg-danger bg-opacity-10 ms-1" title="Hapus Anggota">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <!-- Empty State -->
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="py-4">
+                                    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                        <i class="bi bi-people fs-1 text-muted"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">Tidak Ada Data Anggota</h5>
+                                    <p class="text-muted mb-4 mx-auto" style="max-width: 400px;">
+                                        {% if query %}
+                                            Pencarian dengan kata kunci <strong>"{{ query }}"</strong> tidak menemukan hasil. Coba kata kunci lain.
+                                        {% else %}
+                                            Belum ada data anggota perpustakaan yang tersimpan. Mulai daftarkan anggota baru.
+                                        {% endif %}
+                                    </p>
+                                    
+                                    {% if query %}
+                                        <a href="{% url 'anggota_list' %}" class="btn btn-outline-secondary px-4 fw-semibold rounded-pill">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Reset Pencarian
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'anggota_create' %}" class="btn btn-primary-custom px-4 fw-semibold rounded-pill">
+                                            <i class="bi bi-person-plus-fill me-2"></i>Tambah Anggota Pertama
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginasi -->
+        {% if page_obj.has_other_pages %}
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center p-4 border-top bg-white rounded-bottom">
+                <span class="text-muted small mb-3 mb-md-0 fw-medium">
+                    Menampilkan <span class="text-dark fw-bold">{{ page_obj.start_index }}</span> sampai <span class="text-dark fw-bold">{{ page_obj.end_index }}</span> dari <span class="text-dark fw-bold">{{ page_obj.paginator.count }}</span> anggota
+                </span>
+                
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0 shadow-sm">
+                        <!-- Tombol Prev -->
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link px-3" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Previous">
+                                    <i class="bi bi-chevron-left small"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link px-3"><i class="bi bi-chevron-left small text-muted"></i></span>
+                            </li>
+                        {% endif %}
+
+                        <!-- Nomor Halaman -->
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link fw-bold px-3">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link px-3" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Tombol Next -->
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link px-3" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Next">
+                                    <i class="bi bi-chevron-right small"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link px-3"><i class="bi bi-chevron-right small text-muted"></i></span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

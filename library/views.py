@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, ProtectedError
-from .models import Buku, Kategori
-from .forms import BookForm, KategoriForm
+from .models import Buku, Kategori, Anggota
+from .forms import BookForm, KategoriForm, AnggotaForm
 
 def root_redirect(request):
     if request.user.is_authenticated:
@@ -155,10 +155,82 @@ def kategori_delete(request, pk):
             kategori.delete()
             messages.success(request, f'Kategori "{kategori.nama_kategori}" berhasil dihapus.')
         except ProtectedError:
-            # Meskipun relasi saat ini CASCADE, menangkap ProtectedError adalah best practice 
-            # untuk mencegah aplikasi crash jika arsitektur database diubah di masa depan.
             messages.error(request, f'Gagal menghapus! Kategori "{kategori.nama_kategori}" sedang digunakan.')
             
         return redirect('kategori_list')
         
     return render(request, 'library/kategori_confirm_delete.html', {'kategori': kategori})
+
+@login_required
+def anggota_list(request):
+    query = request.GET.get('q', '')
+    anggota_query = Anggota.objects.all().order_by('-created_at')
+    
+    # Logika Pencarian menggunakan Q objects
+    if query:
+        anggota_query = anggota_query.filter(
+            Q(nama_lengkap__icontains=query) |
+            Q(nomor_anggota__icontains=query) |
+            Q(email__icontains=query)
+        )
+        
+    # Paginasi
+    paginator = Paginator(anggota_query, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'query': query
+    }
+    return render(request, 'library/anggota_list.html', context)
+
+@login_required
+def anggota_create(request):
+    if request.method == 'POST':
+        form = AnggotaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Anggota baru berhasil ditambahkan.')
+            return redirect('anggota_list')
+        else:
+            messages.error(request, 'Terdapat kesalahan input. Silakan periksa kembali.')
+    else:
+        form = AnggotaForm()
+        
+    context = {'form': form, 'title': 'Tambah Anggota Baru'}
+    return render(request, 'library/anggota_form.html', context)
+
+@login_required
+def anggota_update(request, pk):
+    anggota = get_object_or_404(Anggota, pk=pk)
+    
+    if request.method == 'POST':
+        form = AnggotaForm(request.POST, instance=anggota)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Data anggota berhasil diperbarui.')
+            return redirect('anggota_list')
+        else:
+            messages.error(request, 'Terdapat kesalahan input. Silakan periksa kembali.')
+    else:
+        form = AnggotaForm(instance=anggota)
+        
+    context = {'form': form, 'title': 'Edit Data Anggota'}
+    return render(request, 'library/anggota_form.html', context)
+
+@login_required
+def anggota_delete(request, pk):
+    anggota = get_object_or_404(Anggota, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            anggota.delete()
+            messages.success(request, f'Anggota "{anggota.nama_lengkap}" berhasil dihapus.')
+        except ProtectedError:
+            # Menangkap ProtectedError jika anggota memiliki riwayat transaksi peminjaman
+            messages.error(request, f'Gagal menghapus! Anggota "{anggota.nama_lengkap}" memiliki riwayat transaksi peminjaman.')
+            
+        return redirect('anggota_list')
+        
+    return render(request, 'library/anggota_confirm_delete.html', {'anggota': anggota})

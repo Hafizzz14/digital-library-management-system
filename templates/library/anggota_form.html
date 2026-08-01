@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - DigiLib{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Animasi ringan dan hover effect ala SaaS */
+    .digilib-card {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-control {
+        transition: all 0.3s ease;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(43, 84, 126, 0.15);
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .required-asterisk {
+        color: #dc3545;
+        margin-left: 2px;
+    }
+
+    .btn-action {
+        transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-xl-8 col-lg-10">
+        <div class="card digilib-card border-0 shadow-sm overflow-hidden">
+            <!-- Card Header -->
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center">
+                <div class="bg-light p-2 rounded-circle me-3">
+                    <i class="bi bi-person-lines-fill fs-4 text-primary" style="color: var(--primary-color) !important;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">{{ title }}</h5>
+                    <p class="text-muted small mb-0">Lengkapi data diri anggota perpustakaan di bawah ini.</p>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body p-4 p-md-5">
+                <form id="anggotaForm" method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger d-flex align-items-center rounded-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>{{ form.non_field_errors|join:", " }}</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="row gy-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.nomor_anggota.id_for_label }}" class="form-label fw-semibold">Nomor Anggota<span class="required-asterisk">*</span></label>
+                            <input type="text" name="{{ form.nomor_anggota.name }}" class="form-control {% if form.nomor_anggota.errors %}is-invalid{% endif %}" id="{{ form.nomor_anggota.id_for_label }}" value="{{ form.nomor_anggota.value|default_if_none:'' }}" placeholder="Contoh: NIM / NIS / NIK">
+                            {% if form.nomor_anggota.errors %}
+                                <div class="invalid-feedback">{{ form.nomor_anggota.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.nama_lengkap.id_for_label }}" class="form-label fw-semibold">Nama Lengkap<span class="required-asterisk">*</span></label>
+                            <input type="text" name="{{ form.nama_lengkap.name }}" class="form-control {% if form.nama_lengkap.errors %}is-invalid{% endif %}" id="{{ form.nama_lengkap.id_for_label }}" value="{{ form.nama_lengkap.value|default_if_none:'' }}" placeholder="Nama lengkap sesuai identitas">
+                            {% if form.nama_lengkap.errors %}
+                                <div class="invalid-feedback">{{ form.nama_lengkap.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mt-4">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">Alamat Email</label>
+                            <input type="email" name="{{ form.email.name }}" class="form-control {% if form.email.errors %}is-invalid{% endif %}" id="{{ form.email.id_for_label }}" value="{{ form.email.value|default_if_none:'' }}" placeholder="nama@email.com (Opsional)">
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">{{ form.email.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mt-4">
+                            <label for="{{ form.no_telepon.id_for_label }}" class="form-label fw-semibold">Nomor Telepon<span class="required-asterisk">*</span></label>
+                            <input type="text" name="{{ form.no_telepon.name }}" class="form-control {% if form.no_telepon.errors %}is-invalid{% endif %}" id="{{ form.no_telepon.id_for_label }}" value="{{ form.no_telepon.value|default_if_none:'' }}" placeholder="Contoh: 08123456789">
+                            {% if form.no_telepon.errors %}
+                                <div class="invalid-feedback">{{ form.no_telepon.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <label for="{{ form.alamat.id_for_label }}" class="form-label fw-semibold">Alamat Tempat Tinggal<span class="required-asterisk">*</span></label>
+                            <textarea name="{{ form.alamat.name }}" class="form-control {% if form.alamat.errors %}is-invalid{% endif %}" id="{{ form.alamat.id_for_label }}" rows="3" placeholder="Masukkan alamat lengkap RT/RW, Kelurahan, Kecamatan...">{{ form.alamat.value|default_if_none:'' }}</textarea>
+                            {% if form.alamat.errors %}
+                                <div class="invalid-feedback">{{ form.alamat.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-muted border-2 opacity-10">
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'anggota_list' %}" class="btn btn-outline-secondary px-4 btn-action rounded-3 fw-semibold">
+                            Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom px-4 btn-action rounded-3 fw-semibold" id="submitBtn">
+                            <span id="btnText">
+                                <i class="bi bi-save me-1"></i> 
+                                {% if form.instance.pk %}Update Data{% else %}Simpan Anggota{% endif %}
+                            </span>
+                            <span id="btnLoading" class="d-none">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Menyimpan...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript untuk Button Loading State -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const anggotaForm = document.getElementById('anggotaForm');
+        
+        anggotaForm.addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            
+            submitBtn.classList.add('disabled');
+            
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+        });
+    });
+</script>
+{% endblock %}

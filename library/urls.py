@@ -24,4 +24,10 @@ urlpatterns = [
     path('kategori/create/', views.kategori_create, name='kategori_create'),
     path('kategori/<int:pk>/update/', views.kategori_update, name='kategori_update'),
     path('kategori/<int:pk>/delete/', views.kategori_delete, name='kategori_delete'),
+
+    # Anggota CRUD URLs
+    path('anggota/', views.anggota_list, name='anggota_list'),
+    path('anggota/create/', views.anggota_create, name='anggota_create'),
+    path('anggota/<int:pk>/update/', views.anggota_update, name='anggota_update'),
+    path('anggota/<int:pk>/delete/', views.anggota_delete, name='anggota_delete'),
 ]
