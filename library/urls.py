@@ -18,4 +18,10 @@ urlpatterns = [
     path('books/create/', views.book_create, name='book_create'),
     path('books/<int:pk>/update/', views.book_update, name='book_update'),
     path('books/<int:pk>/delete/', views.book_delete, name='book_delete'),
+
+    # Kategori CRUD URLs
+    path('kategori/', views.kategori_list, name='kategori_list'),
+    path('kategori/create/', views.kategori_create, name='kategori_create'),
+    path('kategori/<int:pk>/update/', views.kategori_update, name='kategori_update'),
+    path('kategori/<int:pk>/delete/', views.kategori_delete, name='kategori_delete'),
 ]

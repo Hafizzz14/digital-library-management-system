@@ -1,5 +1,5 @@
 from django import forms
-from .models import Buku
+from .models import Buku, Kategori
 
 class BookForm(forms.ModelForm):
     class Meta:
@@ -9,3 +9,8 @@ class BookForm(forms.ModelForm):
             'tahun_terbit', 'isbn', 'total_stok', 
             'stok_tersedia', 'status', 'cover_image'
         ]
+
+class KategoriForm(forms.ModelForm):
+    class Meta:
+        model = Kategori
+        fields = ['nama_kategori', 'deskripsi']

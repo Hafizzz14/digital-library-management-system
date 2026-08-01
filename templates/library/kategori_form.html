@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - DigiLib{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Animasi ringan dan hover effect ala SaaS */
+    .digilib-card {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-control {
+        transition: all 0.3s ease;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(43, 84, 126, 0.15);
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .required-asterisk {
+        color: #dc3545;
+        margin-left: 2px;
+    }
+
+    .btn-action {
+        transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-xl-8 col-lg-10">
+        <div class="card digilib-card border-0 shadow-sm overflow-hidden">
+            <!-- Card Header -->
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center">
+                <div class="bg-light p-2 rounded-circle me-3">
+                    <i class="bi bi-tags fs-4 text-primary" style="color: var(--primary-color) !important;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark">{{ title }}</h5>
+                    <p class="text-muted small mb-0">Masukkan informasi kategori dengan benar.</p>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body p-4 p-md-5">
+                <form id="kategoriForm" method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger d-flex align-items-center rounded-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>{{ form.non_field_errors|join:", " }}</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="row gy-4">
+                        <div class="col-12">
+                            <div class="mb-4">
+                                <label for="{{ form.nama_kategori.id_for_label }}" class="form-label fw-semibold">Nama Kategori<span class="required-asterisk">*</span></label>
+                                <input type="text" name="{{ form.nama_kategori.name }}" class="form-control {% if form.nama_kategori.errors %}is-invalid{% endif %}" id="{{ form.nama_kategori.id_for_label }}" value="{{ form.nama_kategori.value|default_if_none:'' }}" placeholder="Contoh: Fiksi, Sains, Teknologi...">
+                                {% if form.nama_kategori.errors %}
+                                    <div class="invalid-feedback">{{ form.nama_kategori.errors|join:", " }}</div>
+                                {% endif %}
+                                <div class="form-text small text-muted mt-1">Nama kategori harus unik dan belum pernah digunakan sebelumnya.</div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="{{ form.deskripsi.id_for_label }}" class="form-label fw-semibold">Deskripsi (Opsional)</label>
+                                <textarea name="{{ form.deskripsi.name }}" class="form-control {% if form.deskripsi.errors %}is-invalid{% endif %}" id="{{ form.deskripsi.id_for_label }}" rows="4" placeholder="Penjelasan singkat mengenai kategori ini...">{{ form.deskripsi.value|default_if_none:'' }}</textarea>
+                                {% if form.deskripsi.errors %}
+                                    <div class="invalid-feedback">{{ form.deskripsi.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-muted border-2 opacity-10">
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'kategori_list' %}" class="btn btn-outline-secondary px-4 btn-action rounded-3 fw-semibold">
+                            Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom px-4 btn-action rounded-3 fw-semibold" id="submitBtn">
+                            <span id="btnText">
+                                <i class="bi bi-save me-1"></i> 
+                                {% if form.instance.pk %}Update Kategori{% else %}Simpan Kategori{% endif %}
+                            </span>
+                            <span id="btnLoading" class="d-none">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Menyimpan...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript untuk Button Loading State -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const kategoriForm = document.getElementById('kategoriForm');
+        
+        // Loading State Logic saat form disubmit
+        kategoriForm.addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            
+            // Tambahkan class disabled untuk mencegah multiple klik
+            submitBtn.classList.add('disabled');
+            
+            // Swap text dengan spinner animasi
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+        });
+    });
+</script>
+{% endblock %}
