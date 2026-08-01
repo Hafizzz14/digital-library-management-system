@@ -124,7 +124,7 @@ Digital_Library_Management_System/
 Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+git clone https://github.com/Hafizzz14/digital-library-management-system.git
 ```
 
 Move into the project directory
