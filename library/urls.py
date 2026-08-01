@@ -30,4 +30,9 @@ urlpatterns = [
     path('anggota/create/', views.anggota_create, name='anggota_create'),
     path('anggota/<int:pk>/update/', views.anggota_update, name='anggota_update'),
     path('anggota/<int:pk>/delete/', views.anggota_delete, name='anggota_delete'),
+
+    # Transaksi (Sirkulasi) URLs
+    path('transaksi/', views.transaksi_list, name='transaksi_list'),
+    path('transaksi/pinjam/', views.peminjaman_create, name='peminjaman_create'),
+    path('transaksi/<int:pk>/kembali/', views.pengembalian_proses, name='pengembalian_proses'),
 ]

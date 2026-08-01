@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Transaksi - DigiLib{% endblock %}
+{% block page_title %}Daftar Transaksi{% endblock %}
+
+{% block content %}
+<style>
+    /* SaaS-like Table Styles & Animations */
+    .digilib-card {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .table-hover tbody tr {
+        transition: background-color 0.2s ease;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .search-input:focus {
+        box-shadow: none;
+        border-color: #ced4da;
+    }
+    
+    .search-icon-box {
+        background-color: #fff;
+    }
+    
+    .page-link {
+        color: var(--secondary-color);
+    }
+    
+    .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-action-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        transition: all 0.2s;
+    }
+    
+    .btn-action-icon:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Custom badge styles for transaction states */
+    .badge-borrowed {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        border: 1px solid rgba(13, 110, 253, 0.2);
+    }
+    .badge-returned {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+    .badge-late {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+</style>
+
+<!-- Header Section -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h4 class="fw-bold mb-1 text-dark">
+            <i class="bi bi-arrow-left-right me-2" style="color: var(--primary-color);"></i>Daftar Transaksi
+        </h4>
+        <p class="text-muted small mb-0">Pantau riwayat peminjaman, pengembalian, dan keterlambatan buku.</p>
+    </div>
+    <div>
+        <a href="{% url 'peminjaman_create' %}" class="btn btn-primary-custom px-4 py-2 shadow-sm fw-semibold rounded-3">
+            <i class="bi bi-cart-plus me-2"></i>Pinjam Buku Baru
+        </a>
+    </div>
+</div>
+
+<!-- Notifikasi Messages Django -->
+{% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                {% if message.tags == 'success' %}
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                {% elif message.tags == 'error' %}
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Card Utama -->
+<div class="card digilib-card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <!-- Toolbar Atas: Search Bar -->
+        <div class="p-4 border-bottom bg-white rounded-top">
+            <div class="row">
+                <div class="col-md-6 col-lg-5">
+                    <form method="get" action="">
+                        <div class="input-group input-group-sm shadow-sm rounded-3 overflow-hidden">
+                            <span class="input-group-text search-icon-box border-end-0 text-muted px-3">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control search-input border-start-0 ps-0 py-2" name="q" value="{{ query }}" placeholder="Cari nama anggota, ID, atau judul buku...">
+                            <button class="btn btn-light border px-3 text-muted fw-semibold hover-bg" type="submit">Cari</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Data -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+                <thead class="bg-light text-muted" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;">
+                    <tr>
+                        <th class="ps-4 py-3 border-bottom-0">Peminjam</th>
+                        <th class="py-3 border-bottom-0">Judul Buku</th>
+                        <th class="py-3 border-bottom-0">Tanggal Pinjam</th>
+                        <th class="py-3 border-bottom-0">Tenggat / Kembali</th>
+                        <th class="py-3 border-bottom-0">Status</th>
+                        <th class="pe-4 py-3 border-bottom-0 text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for t in page_obj %}
+                        <tr>
+                            <!-- Kolom: Peminjam -->
+                            <td class="ps-4 py-3">
+                                <div class="fw-bold text-dark">{{ t.anggota.nama_lengkap }}</div>
+                                <div class="small text-muted mt-1">
+                                    <i class="bi bi-person-badge me-1"></i>{{ t.anggota.nomor_anggota }}
+                                </div>
+                            </td>
+                            
+                            <!-- Kolom: Judul Buku -->
+                            <td class="py-3">
+                                <div class="fw-semibold text-dark text-wrap" style="max-width: 200px;">
+                                    {{ t.buku.judul }}
+                                </div>
+                            </td>
+                            
+                            <!-- Kolom: Tanggal Pinjam -->
+                            <td class="py-3 text-muted small">
+                                {{ t.tanggal_pinjam|date:"d M Y" }}
+                            </td>
+
+                            <!-- Kolom: Tenggat / Kembali -->
+                            <td class="py-3 small">
+                                {% if t.status == 'Returned' %}
+                                    <span class="text-success fw-medium">
+                                        <i class="bi bi-check2-all me-1"></i>{{ t.tanggal_kembali|date:"d M Y" }}
+                                    </span>
+                                {% else %}
+                                    <span class="{% if t.is_terlambat %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                        <i class="bi bi-calendar-event me-1"></i>{{ t.batas_kembali|date:"d M Y" }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Kolom: Status -->
+                            <td class="py-3">
+                                {% if t.status == 'Returned' %}
+                                    <span class="badge badge-returned rounded-pill px-3 py-2 fw-semibold">
+                                        <i class="bi bi-bookmark-check-fill me-1"></i> Selesai
+                                    </span>
+                                {% elif t.is_terlambat %}
+                                    <span class="badge badge-late rounded-pill px-3 py-2 fw-semibold">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Terlambat
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-borrowed rounded-pill px-3 py-2 fw-semibold">
+                                        <i class="bi bi-book-half me-1"></i> Aktif
+                                    </span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Kolom: Aksi -->
+                            <td class="pe-4 py-3 text-end">
+                                {% if t.status == 'Borrowed' %}
+                                    <a href="{% url 'pengembalian_proses' t.pk %}" class="btn btn-sm btn-outline-primary fw-semibold rounded-3 shadow-sm transition-all" title="Proses Pengembalian">
+                                        <i class="bi bi-arrow-return-left me-1"></i>Kembalikan
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-light text-muted fw-semibold rounded-3 shadow-none border" disabled>
+                                        <i class="bi bi-check-lg me-1"></i>Tuntas
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <!-- Empty State -->
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="py-4">
+                                    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                        <i class="bi bi-arrow-left-right fs-1 text-muted"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">Belum Ada Transaksi</h5>
+                                    <p class="text-muted mb-4 mx-auto" style="max-width: 400px;">
+                                        {% if query %}
+                                            Pencarian dengan kata kunci <strong>"{{ query }}"</strong> tidak menemukan hasil.
+                                        {% else %}
+                                            Belum ada riwayat peminjaman buku yang tercatat di dalam sistem.
+                                        {% endif %}
+                                    </p>
+                                    
+                                    {% if query %}
+                                        <a href="{% url 'transaksi_list' %}" class="btn btn-outline-secondary px-4 fw-semibold rounded-pill">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Reset Pencarian
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'peminjaman_create' %}" class="btn btn-primary-custom px-4 fw-semibold rounded-pill">
+                                            <i class="bi bi-cart-plus me-2"></i>Mulai Peminjaman Pertama
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginasi -->
+        {% if page_obj.has_other_pages %}
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center p-4 border-top bg-white rounded-bottom">
+                <span class="text-muted small mb-3 mb-md-0 fw-medium">
+                    Menampilkan <span class="text-dark fw-bold">{{ page_obj.start_index }}</span> sampai <span class="text-dark fw-bold">{{ page_obj.end_index }}</span> dari <span class="text-dark fw-bold">{{ page_obj.paginator.count }}</span> transaksi
+                </span>
+                
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0 shadow-sm">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link px-3" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Previous">
+                                    <i class="bi bi-chevron-left small"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link px-3"><i class="bi bi-chevron-left small text-muted"></i></span>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link fw-bold px-3">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link px-3" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link px-3" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Next">
+                                    <i class="bi bi-chevron-right small"></i>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link px-3"><i class="bi bi-chevron-right small text-muted"></i></span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

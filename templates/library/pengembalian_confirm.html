@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Konfirmasi Pengembalian - DigiLib{% endblock %}
+{% block page_title %}Konfirmasi Pengembalian{% endblock %}
+
+{% block content %}
+<style>
+    .digilib-card {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .btn-action {
+        transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+    
+    .action-icon-container {
+        width: 80px;
+        height: 80px;
+        background-color: rgba(13, 110, 253, 0.1); /* Biru transparan */
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card digilib-card border-0 shadow-sm text-center overflow-hidden">
+            <!-- Blue Top Border Indicator -->
+            <div class="bg-primary" style="height: 4px; width: 100%;"></div>
+            
+            <div class="card-body p-4 p-md-5">
+                <div class="action-icon-container mx-auto">
+                    <i class="bi bi-arrow-return-left text-primary" style="font-size: 2.5rem;"></i>
+                </div>
+                
+                <h4 class="fw-bold text-dark mb-3">Proses Pengembalian Buku</h4>
+                
+                <p class="text-muted mb-4 fs-6">
+                    Anda akan memproses pengembalian buku:<br>
+                    <strong class="text-dark fs-5">"{{ transaksi.buku.judul }}"</strong><br>
+                    <span class="small">dipinjam oleh <strong>{{ transaksi.anggota.nama_lengkap }}</strong></span>
+                </p>
+                
+                <!-- Detail Info Box -->
+                <div class="alert alert-light border text-start small mb-4">
+                    <ul class="mb-0 ps-3 text-muted">
+                        <li class="mb-1"><strong>Tanggal Pinjam:</strong> {{ transaksi.tanggal_pinjam|date:"d M Y" }}</li>
+                        <li><strong>Tenggat Waktu:</strong> {{ transaksi.batas_kembali|date:"d M Y" }}</li>
+                    </ul>
+                    <hr class="my-2 border-secondary opacity-25">
+                    <i class="bi bi-info-circle-fill text-primary me-1"></i>
+                    Stok buku akan otomatis ditambahkan kembali ke inventaris.
+                </div>
+
+                <form id="returnForm" method="post" class="d-flex justify-content-center gap-2">
+                    {% csrf_token %}
+                    <a href="{% url 'transaksi_list' %}" class="btn btn-outline-secondary px-4 btn-action rounded-3 fw-semibold">
+                        Batal
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom px-4 btn-action rounded-3 fw-semibold" id="returnBtn">
+                        <span id="btnText">
+                            <i class="bi bi-check-circle me-1"></i> Konfirmasi Kembali
+                        </span>
+                        <span id="btnLoading" class="d-none">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Memproses...
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const returnForm = document.getElementById('returnForm');
+        
+        returnForm.addEventListener('submit', function() {
+            const returnBtn = document.getElementById('returnBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            
+            returnBtn.classList.add('disabled');
+            
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+        });
+    });
+</script>
+{% endblock %}
