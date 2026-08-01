@@ -16,7 +16,7 @@ class Buku(models.Model):
         ('Unavailable', 'Unavailable'),
     ]
 
-    kategori = models.ForeignKey(Kategori, on_delete=models.CASCADE, related_name='buku')
+    kategori = models.ForeignKey(Kategori, on_delete=models.PROTECT, related_name='buku')
     judul = models.CharField(max_length=255)
     penulis = models.CharField(max_length=150)
     penerbit = models.CharField(max_length=150)
