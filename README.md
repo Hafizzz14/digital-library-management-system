@@ -1,4 +1,4 @@
-# 📚 Digital Library Management System
+# Digital Library Management System
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue?logo=python)
 ![Django](https://img.shields.io/badge/Django-6.0-green?logo=django)
@@ -10,50 +10,50 @@ A modern web-based Library Management System built with **Django** and **Bootstr
 
 ---
 
-## ✨ Features
+## Features
 
-### 📊 Dashboard
+### Dashboard
 - Real-time statistics
 - Total books
 - Total members
 - Active borrowings
 - Recently borrowed book (Cookie-based)
 
-### 📚 Book Management
+### Book Management
 - Add books
 - Edit books
 - Delete books
 - Book availability tracking
 - Category assignment
 
-### 👥 Member Management
+### Member Management
 - Register members
 - Update member information
 - Delete members
 - Validation for borrowing history
 
-### 🏷 Category Management
+### Category Management
 - Create categories
 - Update categories
 - Delete categories
 
-### 🔄 Borrowing System
+### Borrowing System
 - Borrow books
 - Automatic stock reduction
 - Automatic due date (7 days)
 - Transaction history
 
-### ✅ Returning System
+### Returning System
 - Return borrowed books
 - Automatic stock restoration
 - Return date recording
 - Transaction status update
 
-### 📄 Reporting
+### Reporting
 - Export transaction history to CSV
 - Excel-compatible CSV format (semicolon delimiter)
 
-### 🔐 Authentication
+### Authentication
 - Django Authentication
 - Login
 - Logout
@@ -61,7 +61,7 @@ A modern web-based Library Management System built with **Django** and **Bootstr
 
 ---
 
-# 🛠 Tech Stack
+# Tech Stack
 
 | Technology | Description |
 |------------|-------------|
@@ -77,7 +77,7 @@ A modern web-based Library Management System built with **Django** and **Bootstr
 
 ---
 
-# 📁 Project Structure
+# Project Structure
 
 ```text
 Digital_Library_Management_System/
@@ -97,7 +97,7 @@ Digital_Library_Management_System/
 
 ---
 
-# 📷 Screenshots
+# Screenshots
 
 ## Login Page
 ![Login](assets/login.png)
@@ -119,7 +119,7 @@ Digital_Library_Management_System/
 
 ---
 
-# ⚙ Installation
+# Installation
 
 Clone the repository
 
@@ -179,7 +179,7 @@ http://127.0.0.1:8000/
 
 ---
 
-# 📌 Business Workflow
+# Business Workflow
 
 ```
 Login
@@ -209,7 +209,7 @@ Export CSV Report
 
 ---
 
-# 🚀 Future Improvements
+# Future Improvements
 
 - PDF Export
 - Search & Filter
@@ -222,7 +222,7 @@ Export CSV Report
 
 ---
 
-# 👨‍💻 Author
+# Author
 
 **Muhamad Hafiz**
 
